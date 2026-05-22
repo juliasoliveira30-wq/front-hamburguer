@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Urban Hamburgueria - Cozinha</title>
+
+  <!-- TAILWIND -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FONT -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- CONFIG -->
+  <script>
+
+    tailwind.config = {
+
+      theme: {
+
+        extend: {
+
+          fontFamily: {
+
+            barlow: ['Barlow', 'sans-serif'],
+
+          },
+
+          colors: {
+
+            primary: '#7f5539',
+            dark: '#1f2937',
+
+          }
+
+        }
+
+      }
+
+    }
+
+  </script>
+
+</head>
+
+<body class="bg-[#f7f4f1] font-barlow min-h-screen overflow-x-hidden text-gray-800">
+
+  <!-- ================= FUNDO ================= -->
+
+  <div class="fixed inset-0 -z-10 overflow-hidden">
+
+    <div
+      class="absolute top-[-120px] left-[-120px] w-[350px] h-[350px] bg-[#7f5539]/20 blur-3xl rounded-full"
+    ></div>
+
+    <div
+      class="absolute bottom-[-120px] right-[-120px] w-[350px] h-[350px] bg-[#a47148]/20 blur-3xl rounded-full"
+    ></div>
+
+  </div>
+
+  <!-- ================= HEADER ================= -->
+
+  <header
+    class="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-[#e8ddd3] shadow-sm"
+  >
+
+    <div
+      class="flex items-center justify-between px-6 py-4"
+    >
+
+      <!-- LOGO -->
+      <div class="flex items-center gap-4">
+
+        <img
+          src="assets/images/banner.png"
+          alt="Logo"
+          class="w-16 h-16 rounded-3xl shadow-xl object-cover border border-[#e8ddd3]"
+        >
+
+        <div>
+
+          <h1
+            class="text-2xl font-extrabold text-dark"
+          >
+            Urban Cozinha
+          </h1>
+
+          <div
+            id="status-conexao"
+            class="flex items-center gap-2 text-sm font-bold text-red-600 mt-1"
+          >
+
+            <span
+              class="w-3 h-3 bg-red-500 rounded-full"
+            ></span>
+
+            Offline
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- BOTÃO -->
+      <button
+        onclick="carregarPedidos()"
+        class="bg-primary text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:brightness-110 transition"
+      >
+
+        Atualizar
+
+      </button>
+
+    </div>
+
+  </header>
+
+  <!-- ================= MAIN ================= -->
+
+  <main class="max-w-7xl mx-auto px-5 py-8">
+
+    <!-- TOPO -->
+    <div
+      class="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-8"
+    >
+
+      <div>
+
+        <h1
+          class="text-5xl font-extrabold text-dark"
+        >
+          Pedidos
+        </h1>
+
+        <p
+          class="text-gray-500 mt-2 text-lg"
+        >
+          Recebimento em tempo real
+        </p>
+
+      </div>
+
+      <!-- CARD CONTADOR -->
+      <div
+        class="bg-white border border-[#eadfd5] rounded-3xl px-6 py-5 shadow-lg"
+      >
+
+        <p class="text-gray-400 text-sm">
+          Pedidos
+        </p>
+
+        <h3
+          id="contador-pedidos"
+          class="text-4xl font-extrabold text-primary mt-1"
+        >
+          0
+        </h3>
+
+      </div>
+
+    </div>
+
+    <!-- PEDIDOS -->
+    <div
+      id="pedidos-container"
+      class="grid gap-6"
+    ></div>
+
+  </main>
+
+  <!-- BOTÃO FLUTUANTE -->
+  <button
+    class="fixed bottom-6 right-6 bg-primary w-16 h-16 rounded-3xl shadow-2xl text-white text-2xl hover:scale-105 transition"
+  >
+    🍔
+  </button>
+
+  <!-- ================= SCRIPT ================= -->
+
+  <script>
+
+    // ==========================================
+    // API
+    // ==========================================
+
+    const URL_API =
+      'https://back-hamburguer-sand.vercel.app/api/pedidos'
+
+    // ==========================================
+    // CARREGAR PEDIDOS
+    // ==========================================
+
+    async function carregarPedidos(){
+
+      const container =
+        document.getElementById('pedidos-container')
+
+      const contador =
+        document.getElementById('contador-pedidos')
+
+      const status =
+        document.getElementById('status-conexao')
+
+      try {
+
+        status.innerHTML = `
+          <span class="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></span>
+          Atualizando...
+        `
+
+        const resposta =
+          await fetch(URL_API)
+
+        if(!resposta.ok){
+
+          throw new Error('Erro ao buscar pedidos')
+
+        }
+
+        const dados =
+          await resposta.json()
+
+        const pedidos =
+          dados.pedidos || dados
+
+        contador.innerHTML =
+          pedidos.length
+
+        renderizarPedidos(pedidos)
+
+        status.innerHTML = `
+          <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+          Online
+        `
+
+        status.className =
+          'flex items-center gap-2 text-sm font-bold text-green-600 mt-1'
+
+      } catch(erro){
+
+        console.log(erro)
+
+        container.innerHTML = `
+
+          <div class="bg-red-100 border border-red-300 rounded-3xl p-6 text-red-600 font-bold">
+
+            Não foi possível carregar os pedidos.
+
+          </div>
+
+        `
+
+        status.innerHTML = `
+          <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+          Offline
+        `
+
+        status.className =
+          'flex items-center gap-2 text-sm font-bold text-red-600 mt-1'
+
+      }
+
+    }
+
+    // ==========================================
+    // RENDERIZAR PEDIDOS
+    // ==========================================
+
+    function renderizarPedidos(pedidos){
+
+      const container =
+        document.getElementById('pedidos-container')
+
+      container.innerHTML = ''
+
+      // SEM PEDIDOS
+      if(pedidos.length === 0){
+
+        container.innerHTML = `
+
+          <div class="bg-white rounded-3xl p-10 text-center shadow-lg border border-[#eadfd5]">
+
+            <div class="text-6xl mb-4">
+              🍔
+            </div>
+
+            <h2 class="text-3xl font-extrabold text-primary">
+              Nenhum pedido
+            </h2>
+
+            <p class="text-gray-500 mt-3">
+              A cozinha está tranquila no momento
+            </p>
+
+          </div>
+
+        `
+
+        return
+
+      }
+
+      // LOOP PEDIDOS
+      pedidos.forEach((pedido) => {
+
+        let itens = []
+
+        try {
+
+          itens =
+            typeof pedido.itens === 'string'
+            ? JSON.parse(pedido.itens)
+            : pedido.itens || []
+
+        } catch {
+
+          itens = []
+
+        }
+
+        let htmlItens = ''
+
+        itens.forEach((item) => {
+
+          htmlItens += `
+
+            <div class="flex justify-between border-b border-gray-100 py-3">
+
+              <span class="font-semibold text-dark">
+
+                ${item.quantidade || 1}x ${item.nome || 'Produto'}
+
+              </span>
+
+              <span class="text-gray-500">
+
+                R$ ${Number(item.preco || 0).toFixed(2)}
+
+              </span>
+
+            </div>
+
+          `
+
+        })
+
+        container.innerHTML += `
+
+          <div class="bg-white rounded-[32px] border border-[#eadfd5] shadow-lg p-7">
+
+            <!-- TOPO -->
+            <div class="flex justify-between items-start mb-6">
+
+              <div>
+
+                <div class="flex items-center gap-3">
+
+                  <h3 class="text-3xl font-extrabold text-dark">
+
+                    Pedido #${pedido.id}
+
+                  </h3>
+
+                  <span class="bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full text-xs font-bold">
+
+                    ${pedido.status || 'Novo'}
+
+                  </span>
+
+                </div>
+
+                <p class="text-gray-600 mt-2 text-lg font-semibold">
+
+                  ${pedido.cliente_nome || 'Cliente'}
+
+                </p>
+
+                <p class="text-gray-400 text-sm mt-1">
+
+                  📍 ${pedido.cliente_endereco || 'Sem endereço'}
+
+                </p>
+
+              </div>
+
+              <!-- TOTAL -->
+              <div class="text-right">
+
+                <p class="text-gray-400 text-sm">
+                  Total
+                </p>
+
+                <h4 class="text-primary text-4xl font-extrabold">
+
+                  R$ ${Number(pedido.total || 0).toFixed(2)}
+
+                </h4>
+
+              </div>
+
+            </div>
+
+            <!-- ITENS -->
+            <div class="bg-[#faf7f3] rounded-3xl border border-[#efe4d8] p-5">
+
+              <h5 class="font-bold text-dark mb-4 text-lg">
+
+                Itens do pedido
+
+              </h5>
+
+              <div class="space-y-2">
+
+                ${htmlItens || '<p class="text-gray-400">Sem itens</p>'}
+
+              </div>
+
+            </div>
+
+            <!-- BOTÕES -->
+            <div class="flex gap-4 mt-6">
+
+              <button
+                onclick="finalizarPedido(${pedido.id})"
+                class="flex-1 bg-primary hover:brightness-110 text-white py-4 rounded-2xl font-bold shadow-lg transition"
+              >
+
+                Finalizar Pedido
+
+              </button>
+
+              <button
+                onclick="deletarPedido(${pedido.id})"
+                class="bg-red-100 hover:bg-red-200 text-red-500 px-6 rounded-2xl font-bold transition"
+              >
+
+                Excluir
+
+              </button>
+
+            </div>
+
+          </div>
+
+        `
+
+      })
+
+    }
+
+    // ==========================================
+    // FINALIZAR
+    // ==========================================
+
+    function finalizarPedido(id){
+
+      alert('Pedido #' + id + ' finalizado 🍔')
+
+    }
+
+    // ==========================================
+    // DELETAR
+    // ==========================================
+
+    async function deletarPedido(id){
+
+      const confirmar =
+        confirm('Deseja deletar o pedido #' + id + '?')
+
+      if(!confirmar){
+
+        return
+
+      }
+
+      try {
+
+        const resposta = await fetch(
+
+          URL_API + '?id=' + id,
+
+          {
+            method: 'DELETE'
+          }
+
+        )
+
+        const dados =
+          await resposta.json()
+
+        if(dados.sucesso){
+
+          carregarPedidos()
+
+        } else {
+
+          alert('Erro ao deletar')
+
+        }
+
+      } catch(erro){
+
+        console.log(erro)
+
+        alert('Erro ao deletar pedido')
+
+      }
+
+    }
+
+    // ==========================================
+    // AUTO LOAD
+    // ==========================================
+
+    carregarPedidos()
+
+    setInterval(carregarPedidos, 10000)
+
+  </script>
+
+</body>
+</html>
