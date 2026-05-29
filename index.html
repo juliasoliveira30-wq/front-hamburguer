@@ -645,8 +645,8 @@
       );
       const modalTotalSpan = document.getElementById("modal-carrinho-total");
       //verifica se o carrinho ja tem itens salvos no localstorage
-      function inicilarCarrinho() {
-        const carrinhoSalvo = localStorage.getItem("big bite_carrinho");
+      function inicializarCarrinho() {
+        const carrinhoSalvo = localStorage.getItem("urban_carrinho");
         if (carrinhoSalvo) {
           //se existir algo salvo converte de volta para array e atualiza o carrinho
           carrinho = JSON.parse(carrinhoSalvo);
@@ -719,7 +719,7 @@
 
       //persistencia do carrinho no localstorage e atualização da interface
       function atualizarCarrinho() {
-        localStorage.setItem("haruy_carrinho", JSON.stringify(carrinho));
+        localStorage.setItem("urban_carrinho", JSON.stringify(carrinho));
         atualizarInterfaceCart();
       }
       function atualizarInterfaceCart() {
@@ -848,7 +848,7 @@ async function fecharPedido() {
     // limpa carrinho
     carrinho = [];
 
-    localStorage.removeItem("bigbite_carrinho");
+    localStorage.removeItem("urban_carrinho");
 
     fecharModalCarrinho();
 
